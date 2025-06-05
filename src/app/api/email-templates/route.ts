@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { emailTemplate } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 
 const db = drizzle(process.env.DATABASE_URL!);
 
