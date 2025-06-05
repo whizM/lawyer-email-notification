@@ -10,7 +10,8 @@ import {
   PackageOpen,
   Settings,
   LogOut,
-  Scale
+  Scale,
+  Mail
 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -28,14 +29,19 @@ const navItems: SidebarNavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: 'Settings',
-    href: '/settings',
-    icon: Settings,
-  },
-  {
     title: 'Lawyers',
     href: '/lawyers',
     icon: Scale,
+  },
+  {
+    title: 'Email Templates',
+    href: '/email-templates',
+    icon: Mail,
+  },
+  {
+    title: 'Settings',
+    href: '/settings',
+    icon: Settings,
   },
 ];
 

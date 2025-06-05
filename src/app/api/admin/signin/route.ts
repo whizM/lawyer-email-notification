@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     );
 
     const token = await new SignJWT({
-      id: admin.id,
+      userId: admin.id,
       email: admin.email,
       name: admin.name,
       role: 'admin'
@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
       value: token,
       httpOnly: true,
       path: '/',
-      secure: process.env.NODE_ENV === 'development',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 1 day
     });
 
