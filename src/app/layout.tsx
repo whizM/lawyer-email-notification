@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Brand PDF",
-  description: "Brand PDF generator",
+  title: "Lawyer Management System",
+  description: "Lawyer Management System",
 };
 
 export default function RootLayout({

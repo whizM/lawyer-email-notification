@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -44,7 +43,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
 
-      const response = await fetch('/api/auth/signin', {
+      const response = await fetch('/api/admin/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,9 +86,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-2">
-          <CardTitle className="text-3xl font-bold">User Login</CardTitle>
+          <CardTitle className="text-3xl font-bold">Administrator Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access the user dashboard
+            Enter your credentials to access the admin dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -121,7 +120,7 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-primary text-primary-foreground" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
@@ -135,7 +134,7 @@ export default function LoginPage() {
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-muted-foreground">
-          Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+          Don&apos;t have an account? <Link href="/admin/signup">Sign up</Link>
         </CardFooter>
       </Card>
     </div>

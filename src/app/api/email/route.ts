@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+// import { db } from '@/db';
+// import { laywers } from '@/db/schema';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { 
+        const {
             email,
             timestamp,
             reportId,
-            reportLink
-         } = body;
-         
-         const transporter = nodemailer.createTransport({
+            formattedContent,
+        } = body;
+
+        // const recipients = await db.select().from(laywers);
+        // const emails = recipients.map((item) => item.email);
+        const emails = ['randy@randykelton.com', 'techguru0411@gmail.com'];
+
+        const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: Number(process.env.SMTP_PORT),
             secure: process.env.SMTP_TLS === 'true',
@@ -20,18 +26,33 @@ export async function POST(request: NextRequest) {
                 pass: process.env.SMTP_PASS,
             },
         });
-        
+        const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2c3e50;">New Report Submission</h2>
+            <p><strong>User Email:</strong> ${email}</p>
+            <p><strong>Submission Time:</strong> ${timestamp}</p>
+            <p><strong>Report ID:</strong> ${reportId}</p>
+            <div style="margin: 20px 0;">
+                ${formattedContent}
+            </div>
+            <p style="margin-top: 20px; color: #7f8c8d;">
+                This is an automated notification from our system.
+            </p>
+        </div>
+    `;
+
         const mailOptions = {
             from: process.env.SMTP_FROM,
-            to: 'techguru0411@gmail.com',
-            subject: 'Your Report',
-            text: `Please find your report at the following link: ${reportLink}. \n \n Auth Email: ${email} \n Timestamp: ${timestamp} \n Report ID: ${reportId}`,
+            to: emails.filter((email) => email !== null),
+            subject: 'Report',
+            text: `Test Report`,
+            html: htmlContent,
         };
-        
+
         await transporter.sendMail(mailOptions);
-        
+
         return NextResponse.json(
-            { message: 'Email sent successfully' },
+            { message: `Email sent to ${emails.join(', ')} successfully` },
             { status: 200 }
         );
     } catch (error) {

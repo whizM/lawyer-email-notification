@@ -9,7 +9,8 @@ import {
   LayoutDashboard,
   PackageOpen,
   Settings,
-  LogOut
+  LogOut,
+  Scale
 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -23,13 +24,18 @@ interface SidebarNavItem {
 const navItems: SidebarNavItem[] = [
   {
     title: 'Dashboard',
-    href: '/admin',
+    href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
     title: 'Settings',
-    href: '/admin/settings',
+    href: '/settings',
     icon: Settings,
+  },
+  {
+    title: 'Lawyers',
+    href: '/lawyers',
+    icon: Scale,
   },
 ];
 
