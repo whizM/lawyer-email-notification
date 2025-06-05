@@ -54,13 +54,13 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(
             { message: `Email sent to ${emails.join(', ')} successfully` },
-            { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } }
+            { status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' } }
         );
     } catch (error) {
         console.error('Sign Up error:', error);
         return NextResponse.json(
             { message: 'Something went wrong' },
-            { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
+            { status: 500, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' } }
         );
     }
 }
