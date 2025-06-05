@@ -8,7 +8,7 @@ const CORS_HEADERS = {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-ID, X-User-Email, Referer',
 };
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
     return new NextResponse(null, {
         status: 200,
         headers: CORS_HEADERS,
