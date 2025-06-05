@@ -12,7 +12,6 @@ export async function middleware(req: NextRequest) {
   if (path === LOGIN) {
     if (token) {
       try {
-        const { payload } = await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET!))
         return NextResponse.redirect(new URL('/dashboard', req.url))
       } catch {
         // Invalid token - clear cookie
