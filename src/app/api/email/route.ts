@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: NextRequest) {
     try {
+
         const body = await request.json();
         const {
             email,
@@ -53,13 +54,13 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(
             { message: `Email sent to ${emails.join(', ')} successfully` },
-            { status: 200 }
+            { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } }
         );
     } catch (error) {
         console.error('Sign Up error:', error);
         return NextResponse.json(
             { message: 'Something went wrong' },
-            { status: 500 }
+            { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
         );
     }
 }
