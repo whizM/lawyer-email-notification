@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-// import { db } from '@/db';
-// import { laywers } from '@/db/schema';
+
+// Define CORS headers (DRY)
+const CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*', // or your specific origin
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-ID, X-User-Email, Referer',
+};
+
+export async function OPTIONS(request: NextRequest) {
+    return new NextResponse(null, {
+        status: 200,
+        headers: CORS_HEADERS,
+    });
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,8 +25,6 @@ export async function POST(request: NextRequest) {
             formattedContent,
         } = body;
 
-        // const recipients = await db.select().from(laywers);
-        // const emails = recipients.map((item) => item.email);
         const emails = ['randy@randykelton.com', 'techguru0411@gmail.com'];
 
         const transporter = nodemailer.createTransport({
@@ -26,6 +36,7 @@ export async function POST(request: NextRequest) {
                 pass: process.env.SMTP_PASS,
             },
         });
+
         const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #2c3e50;">New Report Submission</h2>
@@ -53,13 +64,13 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(
             { message: `Email sent to ${emails.join(', ')} successfully` },
-            { status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-ID, X-User-Email, Referer' } }
+            { status: 200, headers: CORS_HEADERS }
         );
     } catch (error) {
         console.error('Sign Up error:', error);
         return NextResponse.json(
             { message: 'Something went wrong' },
-            { status: 500, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-ID, X-User-Email, Referer' } }
+            { status: 500, headers: CORS_HEADERS }
         );
     }
 }
