@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -67,7 +67,7 @@ export default function EmailTemplatesPage() {
         content: '',
     });
 
-    const fetchTemplates = async () => {
+    const fetchTemplates = useCallback(async () => {
         try {
             setIsLoading(true);
             const response = await fetch('/api/email-templates');
@@ -92,11 +92,11 @@ export default function EmailTemplatesPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [toast]);
 
     useEffect(() => {
         fetchTemplates();
-    }, []);
+    }, [fetchTemplates]);
 
     const resetForm = () => {
         setFormData({ name: '', subject: '', content: '' });
@@ -224,12 +224,10 @@ export default function EmailTemplatesPage() {
                     </p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    {/* <DialogTrigger asChild>
-                        <Button onClick={() => handleOpenDialog()}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            New Template
-                        </Button>
-                    </DialogTrigger> */}
+                    <Button onClick={() => handleOpenDialog()}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Template
+                    </Button>
                     <DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
                             <DialogTitle>

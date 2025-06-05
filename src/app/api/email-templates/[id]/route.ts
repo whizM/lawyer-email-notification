@@ -8,12 +8,13 @@ const db = drizzle(process.env.DATABASE_URL!);
 // GET - Get single email template
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await context.params;
         const template = await db.select()
             .from(emailTemplate)
-            .where(eq(emailTemplate.id, params.id))
+            .where(eq(emailTemplate.id, id))
             .limit(1);
 
         if (template.length === 0) {
@@ -36,9 +37,10 @@ export async function GET(
 // PUT - Update email template
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await context.params;
         const body = await request.json();
         const { name, subject, content } = body;
 
@@ -56,7 +58,7 @@ export async function PUT(
                 content,
                 updatedAt: new Date(),
             })
-            .where(eq(emailTemplate.id, params.id))
+            .where(eq(emailTemplate.id, id))
             .returning();
 
         if (updatedTemplate.length === 0) {
@@ -82,11 +84,12 @@ export async function PUT(
 // DELETE - Delete email template
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await context.params;
         const deletedTemplate = await db.delete(emailTemplate)
-            .where(eq(emailTemplate.id, params.id))
+            .where(eq(emailTemplate.id, id))
             .returning();
 
         if (deletedTemplate.length === 0) {
