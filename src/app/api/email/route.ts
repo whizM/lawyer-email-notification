@@ -5,7 +5,6 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: NextRequest) {
     try {
-
         const body = await request.json();
         const {
             email,
@@ -54,13 +53,13 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(
             { message: `Email sent to ${emails.join(', ')} successfully` },
-            { status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' } }
+            { status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-ID, X-User-Email, Referer' } }
         );
     } catch (error) {
         console.error('Sign Up error:', error);
         return NextResponse.json(
             { message: 'Something went wrong' },
-            { status: 500, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' } }
+            { status: 500, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-ID, X-User-Email, Referer' } }
         );
     }
 }
