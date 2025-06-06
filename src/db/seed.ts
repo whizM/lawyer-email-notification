@@ -1,9 +1,7 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { admins, emailTemplate, laywers } from './schema';
+import { admins, emailTemplate } from './schema';
 import * as bcrypt from 'bcryptjs';
-import csv from 'csvtojson';
-import path from 'path';
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -18,17 +16,6 @@ async function main() {
     await db.insert(admins).values(user);
     console.log('New admin created!')
 
-    const filePath = path.join(process.cwd(), 'public', 'NameEmail.csv');
-    const jsonArray = await csv().fromFile(filePath);
-
-    const laywerRecords = jsonArray.map((item) => ({
-        name: item.Name,
-        email: item.Contact,
-    }));
-
-    await db.insert(laywers).values(laywerRecords);
-
-    console.log('New laywers created!')
 
     const template: typeof emailTemplate.$inferInsert = {
         name: 'Report Notification',

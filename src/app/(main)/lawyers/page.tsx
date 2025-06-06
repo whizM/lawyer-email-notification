@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,12 +19,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { LoaderCircle, Plus, Edit, Trash2, X } from "lucide-react";
+import { LoaderCircle, Plus, Edit, Trash2, X, Upload, FileText } from "lucide-react";
 
-interface Laywer {
+interface Lawyer {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -32,22 +33,25 @@ interface Laywer {
 const API_URL = "/api/lawyer";
 
 export default function LawyersAdminPage() {
-  const [laywers, setLaywers] = useState<Laywer[]>([]);
-  const [form, setForm] = useState<Partial<Laywer>>({});
+  const [lawyers, setLawyers] = useState<Lawyer[]>([]);
+  const [form, setForm] = useState<Partial<Lawyer>>({});
   const [editId, setEditId] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [showForm, setShowForm] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [uploadSuccess, setUploadSuccess] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch laywers
-  const fetchLaywers = async () => {
+  // Fetch lawyers
+  const fetchLawyers = async () => {
     setLoading(true);
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
-      setLaywers(data);
+      setLawyers(data);
     } catch {
       setError("Failed to fetch lawyers");
     }
@@ -55,7 +59,7 @@ export default function LawyersAdminPage() {
   };
 
   useEffect(() => {
-    fetchLaywers();
+    fetchLawyers();
   }, []);
 
   // Handle form change
@@ -69,6 +73,7 @@ export default function LawyersAdminPage() {
     setEditId(null);
     setShowForm(true);
     setError("");
+    setUploadSuccess("");
   };
 
   // Handle add or update
@@ -90,14 +95,14 @@ export default function LawyersAdminPage() {
         response = await fetch(API_URL, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editId, name: form.name, email: form.email }),
+          body: JSON.stringify({ id: editId, name: form.name, email: form.email, phone: form.phone }),
         });
       } else {
         // Add
         response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: form.name, email: form.email }),
+          body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone }),
         });
       }
 
@@ -108,7 +113,7 @@ export default function LawyersAdminPage() {
       setForm({});
       setEditId(null);
       setShowForm(false);
-      fetchLaywers();
+      fetchLawyers();
     } catch {
       setError("Operation failed. Please try again.");
     }
@@ -116,11 +121,12 @@ export default function LawyersAdminPage() {
   };
 
   // Handle edit
-  const handleEdit = (laywer: Laywer) => {
-    setForm({ name: laywer.name, email: laywer.email });
-    setEditId(laywer.id);
+  const handleEdit = (lawyer: Lawyer) => {
+    setForm({ name: lawyer.name, email: lawyer.email, phone: lawyer.phone });
+    setEditId(lawyer.id);
     setShowForm(true);
     setError("");
+    setUploadSuccess("");
   };
 
   // Handle delete
@@ -138,7 +144,7 @@ export default function LawyersAdminPage() {
         throw new Error("Delete failed");
       }
 
-      fetchLaywers();
+      fetchLawyers();
     } catch {
       setError("Failed to delete lawyer. Please try again.");
     }
@@ -150,6 +156,51 @@ export default function LawyersAdminPage() {
     setEditId(null);
     setShowForm(false);
     setError("");
+    setUploadSuccess("");
+  };
+
+  // Handle CSV upload
+  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError("");
+    setUploadSuccess("");
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/lawyer/csv', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed');
+      }
+
+      setUploadSuccess(result.message);
+      if (result.errors && result.errors.length > 0) {
+        setError(`Warnings: ${result.errors.join('; ')}`);
+      }
+      fetchLawyers();
+    } catch (error) {
+      setError(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    setUploading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Trigger file input
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   // Client side pagination
@@ -157,10 +208,11 @@ export default function LawyersAdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter lawyers based on search
-  const filteredLawyers = laywers.filter((l) => {
+  const filteredLawyers = lawyers.filter((l) => {
     const nameMatch = l.name.toLowerCase().includes(search.toLowerCase());
     const emailMatch = l.email.toLowerCase().includes(search.toLowerCase());
-    return nameMatch || emailMatch;
+    const phoneMatch = l.phone?.toLowerCase().includes(search.toLowerCase());
+    return nameMatch || emailMatch || phoneMatch;
   });
 
   const totalPages = Math.ceil(filteredLawyers.length / PAGE_SIZE);
@@ -194,11 +246,7 @@ export default function LawyersAdminPage() {
         );
       }
     } else {
-      // Show ellipsis logic for more than 7 pages
-      const startPage = Math.max(1, currentPage - 2);
-      const endPage = Math.min(totalPages, currentPage + 2);
-
-      // Always show page 1
+      // Always show first page
       items.push(
         <PaginationItem key={1}>
           <PaginationLink
@@ -211,34 +259,39 @@ export default function LawyersAdminPage() {
         </PaginationItem>
       );
 
-      // Show ellipsis after page 1 if needed
-      if (startPage > 2) {
+      // Show ellipsis and current page area
+      if (currentPage > 3) {
         items.push(
-          <PaginationItem key="ellipsis-start">
+          <PaginationItem key="ellipsis1">
             <PaginationEllipsis />
           </PaginationItem>
         );
       }
 
       // Show pages around current page
-      for (let i = Math.max(2, startPage); i <= Math.min(totalPages - 1, endPage); i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => setCurrentPage(i)}
-              isActive={currentPage === i}
-              className="cursor-pointer"
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (i !== 1 && i !== totalPages) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                onClick={() => setCurrentPage(i)}
+                isActive={currentPage === i}
+                className="cursor-pointer"
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
       }
 
       // Show ellipsis before last page if needed
-      if (endPage < totalPages - 1) {
+      if (currentPage < totalPages - 2) {
         items.push(
-          <PaginationItem key="ellipsis-end">
+          <PaginationItem key="ellipsis2">
             <PaginationEllipsis />
           </PaginationItem>
         );
@@ -267,19 +320,66 @@ export default function LawyersAdminPage() {
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Lawyer Management</h1>
 
-      {/* Search and New Lawyer Button */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+      {/* Search and Action Buttons */}
+      <div className="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
         <Input
-          placeholder="Search by name or email..."
+          placeholder="Search by name, email, or phone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-1/3"
+          className="w-full lg:w-1/3"
         />
-        <Button onClick={handleNewLawyer} variant="default" className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          New Lawyer
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={triggerFileInput}
+            variant="outline"
+            className="flex items-center gap-2"
+            disabled={uploading}
+          >
+            {uploading ? (
+              <LoaderCircle className="w-4 h-4 animate-spin" />
+            ) : (
+              <Upload className="w-4 h-4" />
+            )}
+            {uploading ? "Uploading..." : "Upload CSV"}
+          </Button>
+          <Button onClick={handleNewLawyer} variant="default" className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            New Lawyer
+          </Button>
+        </div>
       </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv"
+        onChange={handleCsvUpload}
+        style={{ display: 'none' }}
+      />
+
+      {/* CSV Upload Instructions */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start gap-2">
+          <FileText className="w-5 h-5 text-blue-600 mt-0.5" />
+          <div>
+            <h3 className="font-medium text-blue-900 mb-1">CSV Upload Format</h3>
+            <p className="text-sm text-blue-700">
+              Upload a CSV file with columns: <strong>Attorney</strong> (or Name), <strong>Phone</strong>, <strong>Email</strong>
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              The Phone column is optional. Email column is required for each lawyer.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Success Message */}
+      {uploadSuccess && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {uploadSuccess}
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -338,6 +438,21 @@ export default function LawyersAdminPage() {
               />
             </div>
 
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Phone
+              </label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={form.phone || ""}
+                onChange={handleChange}
+                placeholder="Enter lawyer's phone number"
+                className="w-full"
+              />
+            </div>
+
             <div className="flex gap-2 pt-4">
               <Button
                 type="submit"
@@ -376,13 +491,14 @@ export default function LawyersAdminPage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedLawyers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                       {search ? "No lawyers found matching your search." : "No lawyers found. Add your first lawyer!"}
                     </TableCell>
                   </TableRow>
@@ -391,6 +507,7 @@ export default function LawyersAdminPage() {
                     <TableRow key={l.id}>
                       <TableCell className="font-medium">{l.name}</TableCell>
                       <TableCell>{l.email}</TableCell>
+                      <TableCell>{l.phone || "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -448,7 +565,7 @@ export default function LawyersAdminPage() {
           {/* Results Summary */}
           <div className="text-center text-sm text-gray-600 mt-4">
             Showing {Math.min(startIndex + 1, filteredLawyers.length)} to {Math.min(endIndex, filteredLawyers.length)} of {filteredLawyers.length} lawyers
-            {search && ` (filtered from ${laywers.length} total)`}
+            {search && ` (filtered from ${lawyers.length} total)`}
           </div>
         </>
       )}

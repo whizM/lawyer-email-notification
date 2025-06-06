@@ -27,12 +27,13 @@ export const admins = pgTable("admin", {
     updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
 })
 
-export const laywers = pgTable("laywer", {
+export const lawyers = pgTable("lawyer", {
     id: text("id")
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
     name: text("name"),
-    email: text("email").unique(),
+    email: text("email"),
+    phone: text("phone"),
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
 })

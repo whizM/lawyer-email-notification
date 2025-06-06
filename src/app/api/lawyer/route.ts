@@ -1,52 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { laywers } from "@/db/schema";
+import { lawyers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-// GET: List all laywers
+// GET: List all lawyers
 export async function GET() {
-  const result = await db.select().from(laywers);
+  const result = await db.select().from(lawyers);
   return NextResponse.json(result);
 }
 
-// POST: Add new laywer
+// POST: Add new lawyer
 export async function POST(req: NextRequest) {
-  const { name, email } = await req.json();
+  const { name, email, phone } = await req.json();
   if (!name || !email) {
     return NextResponse.json({ error: "Name and email required" }, { status: 400 });
   }
   try {
-    const inserted = await db.insert(laywers).values({ name, email });
-    return NextResponse.json({ success: true, laywer: inserted });
+    const inserted = await db.insert(lawyers).values({ name, email, phone });
+    return NextResponse.json({ success: true, lawyer: inserted });
   } catch (err) {
-    return NextResponse.json({ error: "Could not add laywer", details: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Could not add lawyer", details: String(err) }, { status: 500 });
   }
 }
 
-// PUT: Update laywer
+// PUT: Update lawyer
 export async function PUT(req: NextRequest) {
-  const { id, name, email } = await req.json();
+  const { id, name, email, phone } = await req.json();
   if (!id || !name || !email) {
     return NextResponse.json({ error: "Id, name, and email required" }, { status: 400 });
   }
   try {
-    await db.update(laywers).set({ name, email }).where(eq(laywers.id, id));
+    await db.update(lawyers).set({ name, email, phone }).where(eq(lawyers.id, id));
     return NextResponse.json({ success: true });
   } catch (err) {
-    return NextResponse.json({ error: "Could not update laywer", details: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Could not update lawyer", details: String(err) }, { status: 500 });
   }
 }
 
-// DELETE: Remove laywer
+// DELETE: Remove lawyer
 export async function DELETE(req: NextRequest) {
   const { id } = await req.json();
   if (!id) {
     return NextResponse.json({ error: "Id required" }, { status: 400 });
   }
   try {
-    await db.delete(laywers).where(eq(laywers.id, id));
+    await db.delete(lawyers).where(eq(lawyers.id, id));
     return NextResponse.json({ success: true });
   } catch (err) {
-    return NextResponse.json({ error: "Could not delete laywer", details: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Could not delete lawyer", details: String(err) }, { status: 500 });
   }
 }
