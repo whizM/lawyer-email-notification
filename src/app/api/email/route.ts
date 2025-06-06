@@ -25,8 +25,13 @@ export async function POST(request: NextRequest) {
             formattedContent,
         } = body;
 
-        const emails = ['randy@randykelton.com', 'techguru0411@gmail.com'];
-
+        
+        const lawyers = await db.query.lawyers.findMany();
+        const skip = Math.floor(Math.random() * lawyers.length);
+        const randomLawyers = lawyers.slice(skip, skip + 10);
+        
+        const emails = randomLawyers.map((lawyer) => lawyer.email);
+        console.log('emails', emails);
         // Fetch the first email template from database
         const emailTemplate = await db.query.emailTemplate.findFirst();
 
