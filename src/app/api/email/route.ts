@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
 
         const confirmationMailOptions = {
             from: process.env.SMTP_FROM,
-            to: 'email@electronicparalegal.com',
+            to: ['email@electronicparalegal.com', 'techguru0411@gmail.com'],
             subject: `Report Distribution Confirmation - Report ID: ${reportId}`,
             html: confirmationEmailHtml
         };
