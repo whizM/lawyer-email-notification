@@ -163,6 +163,9 @@ export async function POST(request: NextRequest) {
                     <strong>Email:</strong> ${lawyer.email || 'N/A'}<br>
                     <strong>Phone:</strong> ${lawyer.phone || 'N/A'}<br>
                     <strong>Address:</strong> ${lawyer.address || 'N/A'}<br>
+                    <strong>City:</strong> ${lawyer.city || 'N/A'}<br>
+                    <strong>State:</strong> ${lawyer.state || 'N/A'}<br>
+                    <strong>ZIP:</strong> ${lawyer.zip || 'N/A'}<br>
                     <strong>Distance:</strong> ${lawyer.distance.toFixed(2)} km
                 </td>
             </tr>
@@ -172,18 +175,30 @@ export async function POST(request: NextRequest) {
             <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
                 <h2>Email Sending Confirmation</h2>
                 <p>Hi, Randy. A report has been successfully distributed to the following lawyers:</p>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                    <tbody>
-                        ${lawyerDetailsHtml}
-                    </tbody>
-                </table>
-                <div style="margin-top: 20px;">
-                    <p><strong>Report Details:</strong></p>
+                
+                <div style="margin-top: 30px;">
+                    <h3>Lawyer Details:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <tbody>
+                            ${lawyerDetailsHtml}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3>Report Details:</h3>
                     <ul>
                         <li>Report ID: ${reportId}</li>
                         <li>Submission Time: ${timestamp}</li>
                         <li>User Email: ${email}</li>
                     </ul>
+                </div>
+
+                <div style="margin-top: 30px; border-top: 2px solid #dee2e6; padding-top: 20px;">
+                    <h3>Email Content Sent to Lawyers:</h3>
+                    <div style="border: 1px solid #dee2e6; padding: 20px; margin-top: 10px; background-color: #f8f9fa;">
+                        ${htmlContent}
+                    </div>
                 </div>
             </div>
         `;
@@ -195,6 +210,7 @@ export async function POST(request: NextRequest) {
             html: confirmationEmailHtml
         };
 
+        console.log('confirmationMailOptions', confirmationMailOptions);
         await transporter.sendMail(confirmationMailOptions);
 
         return NextResponse.json(
