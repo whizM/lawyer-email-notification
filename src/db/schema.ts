@@ -2,19 +2,8 @@ import {
     timestamp,
     pgTable,
     text,
+    jsonb,
 } from "drizzle-orm/pg-core"
-
-// export const users = pgTable("user", {
-//     id: text("id")
-//         .primaryKey()
-//         .$defaultFn(() => crypto.randomUUID()),
-//     name: text("name"),
-//     email: text("email").unique(),
-//     image: text("image"),
-//     password: text("password").notNull(),
-//     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
-//     updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
-// })
 
 export const admins = pgTable("admin", {
     id: text("id")
@@ -34,6 +23,8 @@ export const lawyers = pgTable("lawyer", {
     name: text("name"),
     email: text("email"),
     phone: text("phone"),
+    address: text("address"),
+    coordinates: jsonb("coordinates"),
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
 })

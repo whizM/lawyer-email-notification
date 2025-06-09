@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { db } from '@/db';
+
+interface Coordinates {
+    lat: number;
+    lon: number;
+}
+
+interface Lawyer {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    coordinates?: Coordinates;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
 // Define CORS headers (DRY)
 const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*', // or your specific origin
@@ -15,6 +32,18 @@ export async function OPTIONS() {
     });
 }
 
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in km
+    return distance;
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -23,13 +52,19 @@ export async function POST(request: NextRequest) {
             timestamp,
             reportId,
             formattedContent,
+            coordinates,
         } = body;
 
-        
-        const lawyers = await db.query.lawyers.findMany();
-        const skip = Math.floor(Math.random() * lawyers.length);
-        const randomLawyers = lawyers.slice(skip, skip + 10);
-        
+        const { lat, lon } = coordinates;
+
+        const rawLawyers = await db.query.lawyers.findMany() as Lawyer[];
+        const lawyersWithDistance = rawLawyers.map((lawyer) => {
+            const distance = calculateDistance(lat, lon, lawyer?.coordinates?.lat ?? 0, lawyer?.coordinates?.lon ?? 0);
+            return { ...lawyer, distance };
+        });
+        const sortedLawyers = lawyersWithDistance.filter((lawyer) => lawyer.distance < 100).sort((a, b) => a.distance - b.distance);
+        const randomLawyers = sortedLawyers.slice(0, 10);
+
         const emails = randomLawyers.map((lawyer) => lawyer.email);
         console.log('emails', emails);
         // Fetch the first email template from database
