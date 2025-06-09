@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { db } from '@/db';
-
-interface Coordinates {
-    lat: number;
-    lon: number;
-}
-
 interface Lawyer {
     id: string;
     name: string;
     email: string;
     phone?: string;
     address?: string;
-    coordinates?: Coordinates;
+    city?: string;
+    state?: string;
+    zip?: string;
+    longitude?: string;
+    latitude?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -59,7 +57,7 @@ export async function POST(request: NextRequest) {
 
         const rawLawyers = await db.query.lawyers.findMany() as Lawyer[];
         const lawyersWithDistance = rawLawyers.map((lawyer) => {
-            const distance = calculateDistance(lat, lon, lawyer?.coordinates?.lat ?? 0, lawyer?.coordinates?.lon ?? 0);
+            const distance = calculateDistance(lat, lon, Number(lawyer?.latitude ?? 0), Number(lawyer?.longitude ?? 0));
             return { ...lawyer, distance };
         });
         const sortedLawyers = lawyersWithDistance.filter((lawyer) => lawyer.distance < 100).sort((a, b) => a.distance - b.distance);
@@ -156,6 +154,48 @@ export async function POST(request: NextRequest) {
         };
 
         await transporter.sendMail(mailOptions);
+
+        // Send confirmation email with lawyer details to electronic paralegal
+        const lawyerDetailsHtml = randomLawyers.map(lawyer => `
+            <tr>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">
+                    <strong>Name:</strong> ${lawyer.name || 'N/A'}<br>
+                    <strong>Email:</strong> ${lawyer.email || 'N/A'}<br>
+                    <strong>Phone:</strong> ${lawyer.phone || 'N/A'}<br>
+                    <strong>Address:</strong> ${lawyer.address || 'N/A'}<br>
+                    <strong>Distance:</strong> ${lawyer.distance.toFixed(2)} km
+                </td>
+            </tr>
+        `).join('');
+
+        const confirmationEmailHtml = `
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+                <h2>Email Sending Confirmation</h2>
+                <p>Hi, Randy. A report has been successfully distributed to the following lawyers:</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <tbody>
+                        ${lawyerDetailsHtml}
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px;">
+                    <p><strong>Report Details:</strong></p>
+                    <ul>
+                        <li>Report ID: ${reportId}</li>
+                        <li>Submission Time: ${timestamp}</li>
+                        <li>User Email: ${email}</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        const confirmationMailOptions = {
+            from: process.env.SMTP_FROM,
+            to: 'email@electronicparalegal.com',
+            subject: `Report Distribution Confirmation - Report ID: ${reportId}`,
+            html: confirmationEmailHtml
+        };
+
+        await transporter.sendMail(confirmationMailOptions);
 
         return NextResponse.json(
             { message: `Email sent to ${emails.join(', ')} successfully` },

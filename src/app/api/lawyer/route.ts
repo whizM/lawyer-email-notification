@@ -11,12 +11,12 @@ export async function GET() {
 
 // POST: Add new lawyer
 export async function POST(req: NextRequest) {
-  const { name, email, phone } = await req.json();
+  const { name, email, phone, city, state, zip, longitude, latitude, address } = await req.json();
   if (!name || !email) {
     return NextResponse.json({ error: "Name and email required" }, { status: 400 });
   }
   try {
-    const inserted = await db.insert(lawyers).values({ name, email, phone });
+    const inserted = await db.insert(lawyers).values({ name, email, phone, city, state, zip, longitude, latitude, address });
     return NextResponse.json({ success: true, lawyer: inserted });
   } catch (err) {
     return NextResponse.json({ error: "Could not add lawyer", details: String(err) }, { status: 500 });
@@ -25,12 +25,12 @@ export async function POST(req: NextRequest) {
 
 // PUT: Update lawyer
 export async function PUT(req: NextRequest) {
-  const { id, name, email, phone } = await req.json();
+  const { id, name, email, phone, city, state, zip, longitude, latitude, address } = await req.json();
   if (!id || !name || !email) {
     return NextResponse.json({ error: "Id, name, and email required" }, { status: 400 });
   }
   try {
-    await db.update(lawyers).set({ name, email, phone }).where(eq(lawyers.id, id));
+    await db.update(lawyers).set({ name, email, phone, city, state, zip, longitude, latitude, address }).where(eq(lawyers.id, id));
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: "Could not update lawyer", details: String(err) }, { status: 500 });

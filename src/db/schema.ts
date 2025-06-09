@@ -2,7 +2,6 @@ import {
     timestamp,
     pgTable,
     text,
-    jsonb,
 } from "drizzle-orm/pg-core"
 
 export const admins = pgTable("admin", {
@@ -24,7 +23,11 @@ export const lawyers = pgTable("lawyer", {
     email: text("email"),
     phone: text("phone"),
     address: text("address"),
-    coordinates: jsonb("coordinates"),
+    city: text("city"),
+    state: text("state"),
+    zip: text("zip"),
+    longitude: text("longitude"),
+    latitude: text("latitude"),
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
 })

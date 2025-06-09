@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
         const attorneyIndex = header.findIndex(h => h.includes('attorney') || h.includes('name'));
         const phoneIndex = header.findIndex(h => h.includes('phone'));
         const emailIndex = header.findIndex(h => h.includes('email'));
+        const cityIndex = header.findIndex(h => h.includes('city'));
+        const stateIndex = header.findIndex(h => h.includes('state'));
+        const zipIndex = header.findIndex(h => h.includes('zip'));
+        const addressIndex = header.findIndex(h => h.includes('address'));
+        const longitudeIndex = header.findIndex(h => h.includes('geocodio longitude'));
+        const latitudeIndex = header.findIndex(h => h.includes('geocodio latitude'));
 
         if (attorneyIndex === -1 || emailIndex === -1) {
             return NextResponse.json({
@@ -52,6 +58,12 @@ export async function POST(req: NextRequest) {
             const name = row[attorneyIndex];
             const email = row[emailIndex];
             const phone = phoneIndex !== -1 ? row[phoneIndex] : '';
+            const city = cityIndex !== -1 ? row[cityIndex] : '';
+            const state = stateIndex !== -1 ? row[stateIndex] : '';
+            const zip = zipIndex !== -1 ? row[zipIndex] : '';
+            const address = addressIndex !== -1 ? row[addressIndex] : '';
+            const longitude = longitudeIndex !== -1 ? row[longitudeIndex] : '';
+            const latitude = latitudeIndex !== -1 ? row[latitudeIndex] : '';
             if (!name || !email) {
                 errors.push(`Row ${i + 2}: Missing name or email`);
                 continue;
@@ -67,7 +79,13 @@ export async function POST(req: NextRequest) {
             lawyersToInsert.push({
                 name: name,
                 email: email,
-                phone: phone || null
+                phone: phone || null,
+                city: city || null,
+                state: state || null,
+                zip: zip || null,
+                address: address || null,
+                longitude: longitude || null,
+                latitude: latitude || null
             });
         }
         console.log(errors);

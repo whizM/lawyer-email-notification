@@ -26,6 +26,12 @@ interface Lawyer {
   name: string;
   email: string;
   phone?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  longitude?: string;
+  address?: string;
+  latitude?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -122,7 +128,7 @@ export default function LawyersAdminPage() {
 
   // Handle edit
   const handleEdit = (lawyer: Lawyer) => {
-    setForm({ name: lawyer.name, email: lawyer.email, phone: lawyer.phone });
+    setForm({ name: lawyer.name, email: lawyer.email, phone: lawyer.phone, city: lawyer.city, state: lawyer.state, zip: lawyer.zip, longitude: lawyer.longitude, latitude: lawyer.latitude, address: lawyer.address });
     setEditId(lawyer.id);
     setShowForm(true);
     setError("");
@@ -212,7 +218,10 @@ export default function LawyersAdminPage() {
     const nameMatch = l.name.toLowerCase().includes(search.toLowerCase());
     const emailMatch = l.email.toLowerCase().includes(search.toLowerCase());
     const phoneMatch = l.phone?.toLowerCase().includes(search.toLowerCase());
-    return nameMatch || emailMatch || phoneMatch;
+    const cityMatch = l.city?.toLowerCase().includes(search.toLowerCase());
+    const stateMatch = l.state?.toLowerCase().includes(search.toLowerCase());
+    const zipMatch = l.zip?.toLowerCase().includes(search.toLowerCase());
+    return nameMatch || emailMatch || phoneMatch || cityMatch || stateMatch || zipMatch;
   });
 
   const totalPages = Math.ceil(filteredLawyers.length / PAGE_SIZE);
@@ -492,6 +501,12 @@ export default function LawyersAdminPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>State</TableHead>
+                  <TableHead>Zip</TableHead>
+                  <TableHead>Longitude</TableHead>
+                  <TableHead>Latitude</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -508,6 +523,12 @@ export default function LawyersAdminPage() {
                       <TableCell className="font-medium">{l.name}</TableCell>
                       <TableCell>{l.email}</TableCell>
                       <TableCell>{l.phone || "—"}</TableCell>
+                      <TableCell>{l.address || "—"}</TableCell>
+                      <TableCell>{l.city || "—"}</TableCell>
+                      <TableCell>{l.state || "—"}</TableCell>
+                      <TableCell>{l.zip || "—"}</TableCell>
+                      <TableCell>{l.longitude || "—"}</TableCell>
+                      <TableCell>{l.latitude || "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
