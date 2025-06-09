@@ -152,8 +152,8 @@ export async function POST(request: NextRequest) {
             text: `New Report Submission from ${email}. Report ID: ${reportId}. Time: ${timestamp}`,
             html: htmlContent,
         };
-
-        await transporter.sendMail(mailOptions);
+        console.log('mailOptions', mailOptions);
+        // await transporter.sendMail(mailOptions);
 
         // Send confirmation email with lawyer details to electronic paralegal
         const lawyerDetailsHtml = randomLawyers.map(lawyer => `
