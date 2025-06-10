@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
 
         const emails = randomLawyers.map((lawyer) => lawyer.email);
         console.log('emails', emails);
+
         // Fetch the first email template from database
         const emailTemplate = await db.query.emailTemplate.findFirst();
 
@@ -153,7 +154,7 @@ export async function POST(request: NextRequest) {
             html: htmlContent,
         };
         console.log('mailOptions', mailOptions);
-        // await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
 
         // Send confirmation email with lawyer details to electronic paralegal
         const lawyerDetailsHtml = randomLawyers.map(lawyer => `
