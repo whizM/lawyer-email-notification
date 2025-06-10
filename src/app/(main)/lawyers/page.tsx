@@ -374,10 +374,10 @@ export default function LawyersAdminPage() {
           <div>
             <h3 className="font-medium text-blue-900 mb-1">CSV Upload Format</h3>
             <p className="text-sm text-blue-700">
-              Upload a CSV file with columns: <strong>Attorney</strong> (or Name), <strong>Phone</strong>, <strong>Email</strong>
+              Upload a CSV file with columns: <strong>Attorney</strong> (or Name), <strong>Phone</strong>, <strong>Email</strong>, <strong>Address</strong>, <strong>City</strong>, <strong>State</strong>, <strong>Zip</strong>, <strong>Geocodio Longitude</strong>, <strong>Geocodio Latitude</strong>
             </p>
             <p className="text-xs text-blue-600 mt-1">
-              The Phone column is optional. Email column is required for each lawyer.
+              Email, Address, Geocodio Longitude, and Geocodio Latitude columns are required for each lawyer. Phone, City, State, Zip, are optional.
             </p>
           </div>
         </div>
